@@ -1,0 +1,22 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ボタンタップ時 定義 -->
+    <item android:state_pressed="true">
+        <shape android:shape="oval" android:useLevel="false">
+            <solid android:color="#aaaaaa" />
+            <size
+                android:height="80dp"
+                android:width="80dp" />
+        </shape>
+    </item>
+
+    <!-- ボタン通常表示時 定義 -->
+    <item android:state_pressed="false">
+        <shape android:shape="oval" android:useLevel="false">
+            <solid android:color="@color/darkcyan" />
+            <size
+                android:height="60dp"
+                android:width="60dp" />
+        </shape>
+    </item>
+</selector>

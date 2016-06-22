@@ -1,0 +1,38 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ボタンタップ時 定義 -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval" android:useLevel="false">
+                    <solid android:color="@color/yellow" />
+            		<size
+                		android:height="50dp"
+                		android:width="50dp" />
+        		</shape>
+        	</item>
+        	<item>
+        		<bitmap android:src="@drawable/c03"/>
+        	</item>
+        </layer-list>
+    </item>
+
+
+
+    <!-- ボタン通常表示時 定義 -->
+    <item android:state_pressed="false">
+        <layer-list>
+            <item>
+                <shape android:shape="oval" android:useLevel="false">
+                    <solid android:color="@color/darkcyan" />
+            		<size
+                		android:height="50dp"
+                		android:width="50dp" />
+        		</shape>
+        	</item>
+        	<item>
+        		<bitmap android:src="@drawable/c03"/>
+        	</item>
+        </layer-list>
+	</item>
+</selector>

@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">TimerSpeaker2</string>
+    <string name="max_time_title">max running hours:</string>
+    <string name="interval_time_title">speak every ? minutes:</string>
+    <string name="config_title">くるまとじかんのせってい</string>
+    <string name="cars">どのくるまに\nしようかな</string>
+    <string name="interval">どのくらい\nごとにはなす</string>
+    <string name="max_time">さいだい\nなんじかん</string>
+    <string name="theme">はいけいは\nしろかくろ</string>
+    <string name="white">しろ</string>
+    <string name="black">くろ</string>
+
+    <string name="sec1">１秒ごとにお知らせ　｜３００秒まで</string>
+    <string name="sec10">１０秒ごとにお知らせ｜３００秒まで</string>
+    <string name="min1">１分ごとにお知らせ　｜６０分まで</string>
+    <string name="min5">５分ごとにお知らせ　｜６０分まで</string>
+    <string name="seconds">秒</string>
+    <string name="minute">分</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="reset">Reset</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="config">Setting</string>
+    <string name="info">音声合成ソフトを入れてください</string>
+    <string name="info2">英語でカウントします</string>
+    <string name="info3">日本語も英語もダメです</string>
+    <string name="info4">音声ソフト死んでます</string>
+    <string name="min_lang_jp">、分</string>
+    <string name="min_lang_en">,minute</string>
+    <string name="sec_lang_jp">、秒</string>
+    <string name="sec_lang_en">,seconds</string>
+    <string name="start_jp">スタート</string>
+    <string name="one_seconds">一秒</string>
+    <string name="five_minute">5分</string>
+    <string name="one_hundred">百秒</string>
+
+</resources>
