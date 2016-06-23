@@ -14,6 +14,8 @@ public class Param implements Serializable {
     private boolean reset;  //リセット状態か否か。
     private long endingTime;  //ミリ秒。残り時間。
     
+    private boolean running;
+    
     
     public Param(int carNo, long interval, long startTime, long stopTime, boolean halfwayStopped, boolean reset, long endingTime){
         this.carNo = carNo;
@@ -29,6 +31,11 @@ public class Param implements Serializable {
         	}else{
         		this.endingTime = 60*60*1000;
         	}
+        }
+        if(!halfwayStopped && !reset){
+        	this.running = true;
+        }else{
+        	this.running = false;
         }
     }
 
@@ -71,6 +78,11 @@ public class Param implements Serializable {
 
     public void setHalfwayStopped(boolean halfwayStopped) {
         this.halfwayStopped = halfwayStopped;
+        if(!halfwayStopped && !reset){
+        	this.running = true;
+        }else{
+        	this.running = false;
+        }
     }
 
     public boolean isReset() {
@@ -79,6 +91,19 @@ public class Param implements Serializable {
 
     public void setReset(boolean reset) {
         this.reset = reset;
+        if(!halfwayStopped && !reset){
+        	this.running = true;
+        }else{
+        	this.running = false;
+        }
+    }
+    
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
     
     public long getEndingTime() {
@@ -88,6 +113,7 @@ public class Param implements Serializable {
     public void setEndingTime(long time) {
         this.endingTime = time;
     }
+    
     
     
     

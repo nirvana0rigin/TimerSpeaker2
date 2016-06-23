@@ -190,7 +190,7 @@ public class Start extends Sync implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         //スレッド生→生、タイマー止→生、ステータス0→1
-        if (!param.isHalfwayStopped() && !param.isReset()) {   //要は動作→一時停止
+        if (param.isRunning()) {   //要は動作→一時停止
             param.setHalfwayStopped(true); //view
             param.setReset(false); //thread
             param.setStopTime(System.currentTimeMillis());

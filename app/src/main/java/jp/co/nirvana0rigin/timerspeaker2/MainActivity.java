@@ -1,20 +1,28 @@
 package jp.co.nirvana0rigin.timerspeaker2;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.LinearLayout;
+
+import java.util.Calendar;
 
 public class MainActivity
         extends AppCompatActivity
         implements Config.OnConfigListener, GoConfig.OnGoConfigListener, Reset.OnResetListener, Start.OnStartListener, Sync.OnSyncListener {
 
-    private Context con;
+    private static Context con;
     private Resources res;
     private Bundle b ;
     private FragmentManager fm;
@@ -28,7 +36,7 @@ public class MainActivity
     private GoConfig goConfig;
     private Reset reset;
     private Config config;
-    private Speak speak;
+    private static Speak speak;
     private static Sync sync;
     private LinearLayout base;
 
@@ -42,7 +50,8 @@ public class MainActivity
         3: go_config
         4: reset
      */
-
+	private static AlarmManager alarm;
+    private static PendingIntent pen;
 
 
 
@@ -82,6 +91,7 @@ public class MainActivity
     //描画生成
     @Override
     public void onStart() {
+    	Log.d("_______main_____","onStart");
         super.onStart();
         if(sync == null) {
             param = (Param)b.getSerializable(PARAM);
@@ -96,15 +106,35 @@ public class MainActivity
         addMainFragments() ;
     }
 
+	@Override
+    public void onResume() {
+    	Log.d("_______main_____","onResume");
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+    	Log.d("_______main_____","onPause");
+        super.onPause();
+    }
+
     @Override
     public void onStop() {
+    	Log.d("_______main_____","onStop");
         b.putSerializable(PARAM, param);
         super.onStop();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+    	Log.d("_______main_____","onSave");
         super.onSaveInstanceState(outState);
+    }
+    
+    @Override
+    public void onDestroy() {
+    	Log.d("_______main_____","onD");
+        super.onDestroy();
     }
 
 
@@ -150,7 +180,7 @@ public class MainActivity
 
     @Override
     public void onStartButton() {
-        if(!param.isReset() && !param.isHalfwayStopped()){
+        if(param.isRunning()){
             goConfig.removeButton();
             reset.removeButton();
             speak.speakMinute("start");
@@ -200,10 +230,18 @@ public class MainActivity
     }
 
     @Override
-    public void onSyncRestart(){
-
-
-
+    public void onSyncRestart(boolean run){
+    	if(run){
+    		sync.param = param;
+    		alarmStop();
+    	}else{
+            Log.d("_______main_____","s->m,onSyncRestart,FALSE");
+    		long d = param.getDelay();
+            AlarmManager am = alarmCreate();
+            Calendar cal = getCalendar(d);
+            PendingIntent pen =  getPending(d);
+    		alarmStart(am,cal,pen);
+    	}
     }
 
 
@@ -302,6 +340,73 @@ public class MainActivity
             return true;
         }
     }
+
+
+
+
+    public static class AlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // スクリーンオフのまま、cpuのみ起こす
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "alarm");
+            wl.acquire(5000);
+
+            long delay = intent.getLongExtra("delay",0);
+            long endingTime = param.getEndingTime() - param.getInterval() - delay;
+            param.setEndingTime(endingTime);
+            String min = "" + (param.getSec());
+            if (speak == null) {
+                speak = new Speak();
+            }
+            speak.speakMinute(min);
+            alarm = alarmCreate();
+            pen = getPending(0);
+            alarmStart(alarm, getCalendar(0), pen);
+        }
+    }
+    
+    private static AlarmManager alarmCreate(){
+        AlarmManager alarmManager = (AlarmManager)con.getSystemService(Context.ALARM_SERVICE);
+        return alarmManager;
+    }
+    
+    private static void alarmStart(AlarmManager am, Calendar cal, PendingIntent pen){
+    	if(android.os.Build.VERSION.SDK_INT >= 19){
+    		am.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pen);  
+    	}else{
+    		am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pen);  
+    	}
+    }
+    
+    private void alarmStop(){
+        if(alarm != null) {
+            alarm.cancel(pen);
+        }
+    }
+    
+    private static Calendar getCalendar(long delay){
+    	Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(System.currentTimeMillis());
+        cal.add(Calendar.MILLISECOND, (int)(param.getInterval()*1000+delay));
+        return cal;
+    }
+    
+    private static PendingIntent getPending(long delay){
+    	Intent intent = new Intent(con, AlarmReceiver.class);
+    	intent.putExtra("delay",delay);
+        PendingIntent pen = PendingIntent.getBroadcast(con, 0, intent, 0);
+    	return pen;
+    }
+    
+
+
+
+
+
+
+
+
 
 
 

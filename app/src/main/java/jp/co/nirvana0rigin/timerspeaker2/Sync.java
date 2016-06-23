@@ -37,7 +37,7 @@ public class Sync extends Fragment {
     public static Resources res;
     private static ScheduledExecutorService scheduler;
     private static ScheduledFuture<?> future;
-    private static Handler handler = new Handler();
+    private static Handler handler;
 
 
 
@@ -62,10 +62,10 @@ public class Sync extends Fragment {
     //paramの復帰とコンテキスト取得
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	Log.d("_______sync_____","onCreate");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             param = (Param)getArguments().getSerializable(PARAM);
-
         }
 		//activity再生成時に破棄させないフラグを立てる
 		setRetainInstance(true);
@@ -81,30 +81,35 @@ public class Sync extends Fragment {
     //paramを復帰
     @Override
     public void onStart() {
+    	Log.d("_______sync_____","onStart");
         super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
+        handler = new Handler();
         param = (Param)args.getSerializable(PARAM);
+        if(param.isRunning()){
+            isTimerStopped  = false;
+        	onRestartSync(true);
+        }
         if(param.isAlreadyEnded()){
             resetParam();
         }else {
             sec = param.getSec();
             s = param.getS();
             m = param.getM();
-            if (!param.isReset() && !param.isHalfwayStopped()) {
+            if (param.isRunning()) {
                 startTimer();
-                onRestartRun();
             }
         }
     }
 
     @Override
+    public void onResume() {
+    	Log.d("_______sync_____","onResume");
+        super.onResume();
+    }
+
+    @Override
     public void onPause() {
-        stopTimer();
-        Log.d("_______________","おおおおおおおおおおおお");
+    	Log.d("_______sync_____","onPause");
         args.putSerializable(PARAM, param);
         toActivity(param);
         super.onPause();
@@ -112,14 +117,17 @@ public class Sync extends Fragment {
 
     @Override
     public void onStop() {
+    	Log.d("_______sync_____","onStop");
         stopTimer();
-        args.putSerializable(PARAM, param);
-        toActivity(param);
+        if (param.isRunning()) {
+        	onRestartSync(false);
+        }
         super.onStop();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.d("_______sync_____","onSave");
         outState.putSerializable(PARAM, param);
         toActivity(param);
         super.onSaveInstanceState(outState);
@@ -133,6 +141,7 @@ public class Sync extends Fragment {
 
 	@Override
     public void onDestroy() {
+    	Log.d("_______sync_____","onD");
         super.onDestroy();
     }
 
@@ -150,7 +159,7 @@ public class Sync extends Fragment {
         public void onSyncSec();
         public void onSyncMin(String min);
         public void onSyncTimeUp();
-        public void onSyncRestart();
+        public void onSyncRestart(boolean run);
     }
 
     public void toActivity(Param param) {
@@ -177,9 +186,9 @@ public class Sync extends Fragment {
         }
     }
 
-    public void onRestartRun(){
+    public void onRestartSync(boolean run){
         if (mListener != null) {
-            mListener.onSyncRestart();
+            mListener.onSyncRestart(run);
         }
     }
 
@@ -214,7 +223,6 @@ public class Sync extends Fragment {
     }
 
     public void stopTimer() {
-        isTimerStopped = true;
         if (future != null) {
             future.cancel(true);
             future = null;
@@ -223,31 +231,27 @@ public class Sync extends Fragment {
             scheduler.shutdownNow();
             scheduler = null;
         }
+        isTimerStopped = true;
     }
 
     private class Task implements Runnable {
         public void run() {
-            Task2 task2 = new Task2();
-            handler.removeCallbacks(task2);
-            handler.post(task2);
+            if (isTimerStopped) {
+                handler.getLooper().quit();
+            }
+            handler.post(new Runnable() {
+                public void run() {
+                    sec++;
+                    createTime();
+                    //設定時間で終了させる
+                    if (param.getEndingTime() <= sec * 1000) {
+                        resetParam();
+                    }
+                    //強制終了
+                }
+            });
         }
     }
-
-    private class Task2 implements Runnable {
-        public void run() {
-            sec++;
-            createTime();
-            //設定時間で終了させる
-            if(param.getEndingTime() <= sec*1000){
-                resetParam();
-            }
-            //強制終了
-            if(isTimerStopped){
-                //
-            }
-        }
-    }
-
 
     private void createTime(){
         if(param.getInterval() <= 10){
